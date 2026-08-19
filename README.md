@@ -28,6 +28,18 @@ Default URL:
 http://localhost:5075
 ```
 
+Swagger UI:
+
+```text
+http://localhost:5075/swagger
+```
+
+OpenAPI JSON:
+
+```text
+http://localhost:5075/openapi/v1.json
+```
+
 ## Seeded Users
 
 | Username | Password | Role |

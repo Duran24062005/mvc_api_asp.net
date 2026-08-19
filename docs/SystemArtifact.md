@@ -16,7 +16,7 @@ The project is intentionally documented and structured so each feature can be st
 - Runtime: .NET 10
 - Framework: ASP.NET Core Web API with controllers
 - Authentication: JWT Bearer using `Microsoft.AspNetCore.Authentication.JwtBearer`
-- API description: built-in ASP.NET Core OpenAPI via `Microsoft.AspNetCore.OpenApi`
+- API description: built-in ASP.NET Core OpenAPI JSON plus Swagger UI via `Swashbuckle.AspNetCore`
 - Tests: xUnit with `Microsoft.AspNetCore.Mvc.Testing`
 - Persistence: in-memory repositories for the current learning version
 
@@ -356,17 +356,31 @@ Validation:
 
 ## 10. OpenAPI
 
-In development, the API exposes an OpenAPI document at:
+In development, the API exposes Swagger UI at:
+
+```text
+/swagger
+```
+
+The API also exposes the built-in OpenAPI JSON document at:
 
 ```text
 /openapi/v1.json
 ```
 
-The OpenAPI document includes a Bearer security scheme so clients can understand that protected endpoints expect:
+Swagger UI also exposes its generated JSON at:
+
+```text
+/swagger/v1/swagger.json
+```
+
+The OpenAPI documents include a Bearer security scheme so clients can understand that protected endpoints expect:
 
 ```text
 Authorization: Bearer {token}
 ```
+
+In Swagger UI, click `Authorize`, paste only the JWT token returned by `POST /api/auth/login`, and Swagger UI will send the `Authorization: Bearer {token}` header.
 
 ## 11. Local Development
 
@@ -392,6 +406,12 @@ The default local URL is:
 
 ```text
 http://localhost:5075
+```
+
+Swagger UI:
+
+```text
+http://localhost:5075/swagger
 ```
 
 Run tests:
