@@ -1,0 +1,43 @@
+@MovieApi_HostAddress = http://localhost:5075
+@Token = paste-token-here
+
+POST {{MovieApi_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "Admin123!"
+}
+
+###
+
+GET {{MovieApi_HostAddress}}/api/movies
+Accept: application/json
+Authorization: Bearer {{Token}}
+
+###
+
+POST {{MovieApi_HostAddress}}/api/movies
+Content-Type: application/json
+Authorization: Bearer {{Token}}
+
+{
+  "title": "Interstellar",
+  "genre": "Science Fiction",
+  "releaseYear": 2014,
+  "director": "Christopher Nolan"
+}
+
+###
+
+GET {{MovieApi_HostAddress}}/api/customers
+Accept: application/json
+Authorization: Bearer {{Token}}
+
+###
+
+GET {{MovieApi_HostAddress}}/api/users/me
+Accept: application/json
+Authorization: Bearer {{Token}}
+
+###

@@ -1,0 +1,20 @@
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build and test outputs
+TestResults/
+coverage/
+*.trx
+*.coverage
+*.coveragexml
+
+# Local configuration
+.env
+.env.*
+appsettings.Local.json
