@@ -1,11 +1,12 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
-using MovieApi.Contracts.Auth;
-using MovieApi.Contracts.Customers;
-using MovieApi.Contracts.Movies;
-using MovieApi.Contracts.Users;
+using MovieApi.Modules.Customers.Contracts;
+using MovieApi.Modules.Identity.Contracts.Auth;
+using MovieApi.Modules.Identity.Contracts.Users;
+using MovieApi.Modules.Movies.Contracts;
 
 namespace MovieApi.Tests;
 
@@ -165,6 +166,26 @@ public sealed class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Pr
         });
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact(DisplayName = "Swagger document exposes endpoints from every module")]
+    public async Task SwaggerDocumentExposesModularEndpoints()
+    {
+        var response = await _client.GetAsync("/swagger/v1/swagger.json");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        using var document = await JsonDocument.ParseAsync(stream);
+        var pathNames = document.RootElement
+            .GetProperty("paths")
+            .EnumerateObject()
+            .Select(path => path.Name)
+            .ToArray();
+
+        Assert.Contains("/api/auth/login", pathNames);
+        Assert.Contains("/api/users/me", pathNames);
+        Assert.Contains("/api/movies", pathNames);
+        Assert.Contains("/api/customers", pathNames);
     }
 
     private async Task<LoginResponse> LoginAsync(string username, string password)
