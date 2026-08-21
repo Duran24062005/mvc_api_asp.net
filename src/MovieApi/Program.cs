@@ -4,11 +4,11 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using MovieApi.Modules.Customers;
+using MovieApi.Modules.Identity;
+using MovieApi.Modules.Identity.Configuration;
+using MovieApi.Modules.Movies;
 using MovieApi.OpenApi;
-using MovieApi.Options;
-using MovieApi.Repositories;
-using MovieApi.Security;
-using MovieApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -71,12 +71,10 @@ builder.Services
     });
 builder.Services.AddAuthorization();
 
-builder.Services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
-builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();
-builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
-builder.Services.AddSingleton<IAuthService, AuthService>();
-builder.Services.AddSingleton<IMovieRepository, InMemoryMovieRepository>();
-builder.Services.AddSingleton<ICustomerRepository, InMemoryCustomerRepository>();
+builder.Services
+    .AddIdentityModule()
+    .AddMoviesModule()
+    .AddCustomersModule();
 
 var app = builder.Build();
 
