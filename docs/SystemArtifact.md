@@ -4,7 +4,7 @@
 
 This repository contains a learning API for movies, customers, and users built with ASP.NET Core Web API on .NET 10.
 
-The project is intentionally documented and structured so each feature can be studied independently:
+The project is intentionally documented and structured as a modular monolith so each business capability can be studied independently while still running as one API:
 
 - Authentication: login with seeded users and JWT Bearer tokens.
 - Movies: protected CRUD endpoints for a movie catalog.
@@ -31,20 +31,36 @@ The project is intentionally documented and structured so each feature can be st
 │   ├── 001-authentication.md
 │   ├── 002-movies.md
 │   ├── 003-customers.md
-│   └── 004-users.md
+│   ├── 004-users.md
+│   ├── 005-persistence-database.md
+│   └── 006-modular-monolith.md
 ├── src/
 │   └── MovieApi/
-│       ├── Authentication/
-│       ├── Constants/
-│       ├── Contracts/
-│       ├── Controllers/
-│       ├── Domain/
-│       ├── Mapping/
+│       ├── Modules/
+│       │   ├── Customers/
+│       │   │   ├── Application/
+│       │   │   ├── Contracts/
+│       │   │   ├── Domain/
+│       │   │   ├── Infrastructure/
+│       │   │   ├── Mapping/
+│       │   │   └── Presentation/
+│       │   ├── Identity/
+│       │   │   ├── Application/
+│       │   │   ├── Configuration/
+│       │   │   ├── Contracts/
+│       │   │   ├── Domain/
+│       │   │   ├── Infrastructure/
+│       │   │   ├── Mapping/
+│       │   │   └── Presentation/
+│       │   └── Movies/
+│       │       ├── Application/
+│       │       ├── Contracts/
+│       │       ├── Domain/
+│       │       ├── Infrastructure/
+│       │       ├── Mapping/
+│       │       └── Presentation/
 │       ├── OpenApi/
-│       ├── Options/
-│       ├── Repositories/
-│       ├── Security/
-│       ├── Services/
+│       ├── SharedKernel/
 │       ├── Program.cs
 │       └── appsettings.json
 ├── tests/
@@ -54,26 +70,32 @@ The project is intentionally documented and structured so each feature can be st
 
 ## 4. Application Architecture
 
-The application uses a simple layered structure:
+The application is a modular monolith:
 
-- Controllers handle HTTP routes, authorization attributes, and HTTP status codes.
-- Contracts define request and response DTOs exposed by the API.
-- Services handle use cases that are not simple persistence operations, such as login and token creation.
-- Repositories keep in-memory state for movies, customers, and users.
-- Domain records represent internal data.
-- Mapping extensions convert internal domain records to public response DTOs.
-- Security contains password hashing logic.
-- Options contains typed configuration models.
+- One ASP.NET Core project, one process, and one deployable API.
+- Business capabilities are grouped under `Modules/`.
+- Each module owns its HTTP controllers, API contracts, domain records, application ports, mappers, and infrastructure implementations.
+- `Program.cs` is the composition root. It configures cross-cutting ASP.NET Core features and calls module registration methods.
+- `SharedKernel` contains concepts intentionally shared by more than one module. It currently contains authorization role names.
+- `OpenApi` remains cross-cutting because it configures the API document rather than one business capability.
 
-This is not a production architecture yet. It is intentionally small so the main ASP.NET Core concepts are visible.
+### Module Boundaries
+
+| Module | Owns | Public HTTP surface |
+| --- | --- | --- |
+| `Identity` | Login, JWT token creation, seeded users, password hashing, user profile mapping, user repository port and in-memory implementation | `/api/auth`, `/api/users` |
+| `Movies` | Movie contracts, movie domain record, movie mapper, movie repository port and in-memory implementation | `/api/movies` |
+| `Customers` | Customer contracts, customer domain record, customer mapper, customer repository port and in-memory implementation | `/api/customers` |
+
+This is not a production architecture yet. It keeps the learning API small while making ownership boundaries visible.
 
 ## 5. Database and Persistence
 
 The current project does not use an external database engine yet. Persistence is implemented with singleton in-memory repositories registered in dependency injection:
 
-- `InMemoryUserRepository`
-- `InMemoryMovieRepository`
-- `InMemoryCustomerRepository`
+- `Modules/Identity/Infrastructure/InMemoryUserRepository`
+- `Modules/Movies/Infrastructure/InMemoryMovieRepository`
+- `Modules/Customers/Infrastructure/InMemoryCustomerRepository`
 
 This means data lives only while the application process is running. Restarting the API resets movies, customers, and users to the seeded records.
 
@@ -205,7 +227,7 @@ Recommended next implementation step for a real database:
 
 Authentication uses JWT Bearer tokens.
 
-The application registers authentication in `Program.cs` and validates:
+The application registers authentication in `Program.cs`; identity-specific services are registered by `AddIdentityModule`. Token validation checks:
 
 - issuer
 - audience

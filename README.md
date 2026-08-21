@@ -6,6 +6,7 @@ Learning API built with ASP.NET Core Web API and .NET 10.
 
 ## Features
 
+- Modular monolith structure with Identity, Movies, and Customers modules.
 - JWT login with seeded `admin` and `user` accounts.
 - Protected movie CRUD endpoints.
 - Protected customer CRUD endpoints.
@@ -60,3 +61,15 @@ The test suite currently covers authentication, authorization, movie CRUD, custo
 The current version uses in-memory repositories, so data resets when the API restarts. The current entities, seed data, rules, and future relational schema are documented in `docs/SystemArtifact.md`.
 
 See `src/MovieApi/MovieApi.http` for request examples.
+
+## Architecture
+
+The API is a single ASP.NET Core application organized as a modular monolith:
+
+- `Modules/Identity` owns login, JWT token creation, seeded users, user profile endpoints, password hashing, and identity contracts.
+- `Modules/Movies` owns movie contracts, domain records, mapping, endpoints, and in-memory movie storage.
+- `Modules/Customers` owns customer contracts, domain records, mapping, endpoints, and in-memory customer storage.
+- `SharedKernel` contains small cross-module concepts, currently shared authorization role names.
+- `Program.cs` remains the composition root and wires modules through `AddIdentityModule`, `AddMoviesModule`, and `AddCustomersModule`.
+
+See `prds/006-modular-monolith.md` and `docs/SystemArtifact.md` for the architecture rationale and module boundaries.
